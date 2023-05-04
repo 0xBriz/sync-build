@@ -112,8 +112,38 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
 
         // TODO: Both cases here only build when the code is commented out
         // So library import or internal function is not the issue
+
+        // Try "lite" math version. The calcs in FixedPoint might be the issue?
         // return WeightedMath._calculateInvariant(normalizedWeights, balances);
         return _calculateInvariant(normalizedWeights, balances);
+    }
+
+    // About swap fees on joins and exits:
+    // Any join or exit that is not perfectly balanced (e.g. all single token joins or exits) is mathematically
+    // equivalent to a perfectly balanced join or exit followed by a series of swaps. Since these swaps would charge
+    // swap fees, it follows that (some) joins and exits should as well.
+    // On these operations, we split the token amounts in 'taxable' and 'non-taxable' portions, where the 'taxable' part
+    // is the one to which swap fees are applied.
+
+    // Invariant is used to collect protocol swap fees by comparing its value between two times.
+    // So we can round always to the same direction. It is also used to initiate the BPT amount
+    // and, because there is a minimum BPT, we round down the invariant.
+    function _calculateInvariant(
+        uint256[] memory normalizedWeights,
+        uint256[] memory balances
+    ) internal pure returns (uint256 invariant) {
+        /**********************************************************************************************
+        // invariant               _____                                                             //
+        // wi = weight index i      | |      wi                                                      //
+        // bi = balance index i     | |  bi ^   = i                                                  //
+        // i = invariant                                                                             //
+        **********************************************************************************************/
+        // uint256 invariant = FixedPoint.ONE;
+        // for (uint256 i = 0; i < normalizedWeights.length; i++) {
+        //     invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
+        // }
+        // _require(invariant > 0, Errors.ZERO_INVARIANT);
+        // return invariant;
     }
 
     // Base Pool handlers
@@ -274,33 +304,6 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
     }
 
     // MAFS
-
-    // About swap fees on joins and exits:
-    // Any join or exit that is not perfectly balanced (e.g. all single token joins or exits) is mathematically
-    // equivalent to a perfectly balanced join or exit followed by a series of swaps. Since these swaps would charge
-    // swap fees, it follows that (some) joins and exits should as well.
-    // On these operations, we split the token amounts in 'taxable' and 'non-taxable' portions, where the 'taxable' part
-    // is the one to which swap fees are applied.
-
-    // Invariant is used to collect protocol swap fees by comparing its value between two times.
-    // So we can round always to the same direction. It is also used to initiate the BPT amount
-    // and, because there is a minimum BPT, we round down the invariant.
-    function _calculateInvariant(
-        uint256[] memory normalizedWeights,
-        uint256[] memory balances
-    ) internal pure returns (uint256 invariant) {
-        /**********************************************************************************************
-        // invariant               _____                                                             //
-        // wi = weight index i      | |      wi                                                      //
-        // bi = balance index i     | |  bi ^   = i                                                  //
-        // i = invariant                                                                             //
-        **********************************************************************************************/
-        // invariant = FixedPoint.ONE;
-        // for (uint256 i = 0; i < normalizedWeights.length; i++) {
-        //     invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
-        // }
-        // _require(invariant > 0, Errors.ZERO_INVARIANT);
-    }
 
     // Computes how many tokens can be taken out of a pool if `amountIn` are sent, given the
     // current balances and weights.
