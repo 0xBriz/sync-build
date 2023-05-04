@@ -20,11 +20,11 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  // zksolc: {
-  //   version: "1.3.9",
-  //   compilerSource: "binary",
-  //   settings: {},
-  // },
+  zksolc: {
+    version: "1.3.9",
+    compilerSource: "binary",
+    settings: {},
+  },
   networks: {
     hardhat: {
       // zksync: true,
