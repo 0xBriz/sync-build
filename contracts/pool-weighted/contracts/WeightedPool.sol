@@ -8,7 +8,8 @@ import "../../interfaces/contracts/pool-utils/IRateProvider.sol";
 import "../../interfaces/contracts/standalone-utils/IProtocolFeePercentagesProvider.sol";
 
 import "./BaseWeightedPool.sol";
-import "./WeightedMath.sol";
+
+// import "./WeightedMath.sol";
 
 contract WeightedPool is BaseWeightedPool {
     using FixedPoint for uint256;
@@ -89,7 +90,7 @@ contract WeightedPool is BaseWeightedPool {
         for (uint8 i = 0; i < numTokens; i++) {
             uint256 normalizedWeight = params.normalizedWeights[i];
 
-            _require(normalizedWeight >= WeightedMath._MIN_WEIGHT, Errors.MIN_WEIGHT);
+            //  _require(normalizedWeight >= WeightedMath._MIN_WEIGHT, Errors.MIN_WEIGHT);
             normalizedSum = normalizedSum.add(normalizedWeight);
         }
         // Ensure that the normalized weights sum to ONE

@@ -5,6 +5,8 @@ pragma experimental ABIEncoderV2;
 import "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
 import "../../pool-utils/contracts/BaseMinimalSwapInfoPool.sol";
 
+// import "./WeightedMath.sol";
+
 abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
     constructor(
         IVault vault,
@@ -62,6 +64,20 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
     function getNormalizedWeights() external view returns (uint256[] memory) {
         return _getNormalizedWeights();
     }
+
+    // /**
+    //  * @dev Returns the current value of the invariant.
+    //  */
+    // function getInvariant() public view returns (uint256) {
+    //     (, uint256[] memory balances, ) = getVault().getPoolTokens(getPoolId());
+
+    //     // Since the Pool hooks always work with upscaled balances, we manually
+    //     // upscale here for consistency
+    //     _upscaleArray(balances, _scalingFactors());
+
+    //     uint256[] memory normalizedWeights = _getNormalizedWeights();
+    //     return WeightedMath._calculateInvariant(normalizedWeights, balances);
+    // }
 
     // Base Pool handlers
 
