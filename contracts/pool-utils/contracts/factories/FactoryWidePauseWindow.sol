@@ -15,9 +15,9 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "@balancer-labs/v2-interfaces/contracts/solidity-utils/helpers/BalancerErrors.sol";
+import "../../../interfaces/contracts/solidity-utils/helpers/BalancerErrors.sol";
 
-import "@balancer-labs/v2-solidity-utils/contracts/helpers/TemporarilyPausable.sol";
+import "../../../solidity-utils/contracts/helpers/TemporarilyPausable.sol";
 
 /**
  * @dev Utility to create Pool factories for Pools that use the `TemporarilyPausable` contract.

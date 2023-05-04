@@ -15,11 +15,11 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
-import "@balancer-labs/v2-interfaces/contracts/standalone-utils/IProtocolFeePercentagesProvider.sol";
-import "@balancer-labs/v2-interfaces/contracts/pool-utils/IBasePoolFactory.sol";
-import "@balancer-labs/v2-solidity-utils/contracts/helpers/BaseSplitCodeFactory.sol";
-import "@balancer-labs/v2-solidity-utils/contracts/helpers/SingletonAuthentication.sol";
+import "../../../interfaces/contracts/vault/IVault.sol";
+import "../../../interfaces/contracts/standalone-utils/IProtocolFeePercentagesProvider.sol";
+import "../../../interfaces/contracts/pool-utils/IBasePoolFactory.sol";
+import "../../../solidity-utils/contracts/helpers/BaseSplitCodeFactory.sol";
+import "../../../solidity-utils/contracts/helpers/SingletonAuthentication.sol";
 
 import "./FactoryWidePauseWindow.sol";
 
