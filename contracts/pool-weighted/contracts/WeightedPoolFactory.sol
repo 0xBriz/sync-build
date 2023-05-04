@@ -17,7 +17,7 @@ pragma experimental ABIEncoderV2;
 
 import "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
 
-import "../pool-utils/contracts/factories/BasePoolFactory.sol";
+import "../../pool-utils/contracts/factories/BasePoolFactory.sol";
 
 import "./WeightedPool.sol";
 

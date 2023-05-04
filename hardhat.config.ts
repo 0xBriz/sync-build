@@ -1,7 +1,6 @@
 import * as dotenv from "dotenv";
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
-import "@openzeppelin/hardhat-upgrades";
 import "@matterlabs/hardhat-zksync-deploy";
 import "@matterlabs/hardhat-zksync-solc";
 
@@ -21,25 +20,14 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  zksolc: {
-    version: "1.3.8",
-    compilerSource: "binary",
-    settings: {},
-  },
+  // zksolc: {
+  //   version: "1.3.9",
+  //   compilerSource: "binary",
+  //   settings: {},
+  // },
   networks: {
     hardhat: {
-      forking: {
-        url: process.env.BSC_RPC || "",
-        blockNumber: 25894014,
-      },
-    },
-    goerli: {
-      url: process.env.GOERLI_RPC || "",
-      accounts: process.env.DEV_KEY !== undefined ? [process.env.DEV_KEY] : [],
-    },
-    bsc: {
-      url: process.env.BSC_RPC || "",
-      accounts: process.env.DEV_KEY !== undefined ? [process.env.DEV_KEY] : [],
+      // zksync: true,
     },
     zkSyncTestnet: {
       url: "https://testnet.era.zksync.dev", // The testnet RPC URL of zkSync Era network.
@@ -56,9 +44,6 @@ const config: HardhatUserConfig = {
       chainId: 270,
       zksync: true,
     },
-  },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
 
