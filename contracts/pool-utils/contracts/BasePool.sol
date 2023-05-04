@@ -27,12 +27,12 @@ import "@balancer-labs/v2-solidity-utils/contracts/openzeppelin/ERC20.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/math/Math.sol";
 
-import "./lib/PoolRegistrationLib.sol";
+import "@balancer-labs/v2-pool-utils/contracts/lib/PoolRegistrationLib.sol";
 
-import "./BalancerPoolToken.sol";
+import "@balancer-labs/v2-pool-utils/contracts/BalancerPoolToken.sol";
 import "@balancer-labs/v2-pool-utils/contracts/BasePoolAuthorization.sol";
 
-// import "@balancer-labs/v2-pool-utils/contracts/RecoveryMode.sol";
+import "@balancer-labs/v2-pool-utils/contracts/RecoveryMode.sol";
 
 // solhint-disable max-states-count
 
