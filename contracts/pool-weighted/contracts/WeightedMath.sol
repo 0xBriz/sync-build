@@ -38,13 +38,11 @@ library WeightedMath {
         // bi = balance index i     | |  bi ^   = i                                                  //
         // i = invariant                                                                             //
         **********************************************************************************************/
-
-        invariant = FixedPoint.ONE;
-        for (uint256 i = 0; i < normalizedWeights.length; i++) {
-            invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
-        }
-
-        _require(invariant > 0, Errors.ZERO_INVARIANT);
+        // invariant = FixedPoint.ONE;
+        // for (uint256 i = 0; i < normalizedWeights.length; i++) {
+        //     invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
+        // }
+        // _require(invariant > 0, Errors.ZERO_INVARIANT);
     }
 
     // Computes how many tokens can be taken out of a pool if `amountIn` are sent, given the

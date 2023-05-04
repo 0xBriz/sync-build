@@ -105,8 +105,8 @@ abstract contract BasePool is
     constructor(
         IVault vault,
         IVault.PoolSpecialization specialization,
-        string memory name,
-        string memory symbol,
+        string memory _name,
+        string memory _symbol,
         IERC20[] memory tokens,
         address[] memory assetManagers,
         uint256 swapFeePercentage,
@@ -120,7 +120,7 @@ abstract contract BasePool is
         // any Pool created by the same factory), while still making action identifiers unique among different factories
         // if the selectors match, preventing accidental errors.
         Authentication(bytes32(uint256(msg.sender)))
-        BalancerPoolToken(name, symbol, vault)
+        BalancerPoolToken(_name, _symbol, vault)
         BasePoolAuthorization(owner)
         TemporarilyPausable(pauseWindowDuration, bufferPeriodDuration)
         RecoveryMode(vault)
