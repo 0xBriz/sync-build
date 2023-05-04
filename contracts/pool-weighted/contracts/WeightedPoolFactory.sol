@@ -17,62 +17,62 @@ pragma experimental ABIEncoderV2;
 
 import "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
 
-import "@balancer-labs/v2-pool-utils/contracts/factories/BasePoolFactory.sol";
+import "../../pool-utils/contracts/factories/BasePoolFactory.sol";
 
 import "./WeightedPool.sol";
 
 contract WeightedPoolFactory is BasePoolFactory {
-    constructor(
-        IVault vault,
-        IProtocolFeePercentagesProvider protocolFeeProvider,
-        uint256 initialPauseWindowDuration,
-        uint256 bufferPeriodDuration
+  constructor(
+    IVault vault,
+    IProtocolFeePercentagesProvider protocolFeeProvider,
+    uint256 initialPauseWindowDuration,
+    uint256 bufferPeriodDuration
+  )
+    BasePoolFactory(
+      vault,
+      protocolFeeProvider,
+      initialPauseWindowDuration,
+      bufferPeriodDuration,
+      type(WeightedPool).creationCode
     )
-        BasePoolFactory(
-            vault,
-            protocolFeeProvider,
-            initialPauseWindowDuration,
-            bufferPeriodDuration,
-            type(WeightedPool).creationCode
-        )
-    {
-        // solhint-disable-previous-line no-empty-blocks
-    }
+  {
+    // solhint-disable-previous-line no-empty-blocks
+  }
 
-    /**
-     * @dev Deploys a new `WeightedPool`.
-     */
-    function create(
-        string memory name,
-        string memory symbol,
-        IERC20[] memory tokens,
-        uint256[] memory normalizedWeights,
-        IRateProvider[] memory rateProviders,
-        uint256 swapFeePercentage,
-        address owner,
-        bytes32 salt
-    ) external returns (address) {
-        (uint256 pauseWindowDuration, uint256 bufferPeriodDuration) = getPauseConfiguration();
+  /**
+   * @dev Deploys a new `WeightedPool`.
+   */
+  function create(
+    string memory name,
+    string memory symbol,
+    IERC20[] memory tokens,
+    uint256[] memory normalizedWeights,
+    IRateProvider[] memory rateProviders,
+    uint256 swapFeePercentage,
+    address owner,
+    bytes32 salt
+  ) external returns (address) {
+    (uint256 pauseWindowDuration, uint256 bufferPeriodDuration) = getPauseConfiguration();
 
-        return
-            _create(
-                abi.encode(
-                    WeightedPool.NewPoolParams({
-                        name: name,
-                        symbol: symbol,
-                        tokens: tokens,
-                        normalizedWeights: normalizedWeights,
-                        rateProviders: rateProviders,
-                        assetManagers: new address[](tokens.length), // Don't allow asset managers,
-                        swapFeePercentage: swapFeePercentage
-                    }),
-                    getVault(),
-                    getProtocolFeePercentagesProvider(),
-                    pauseWindowDuration,
-                    bufferPeriodDuration,
-                    owner
-                ),
-                salt
-            );
-    }
+    return
+      _create(
+        abi.encode(
+          WeightedPool.NewPoolParams({
+            name: name,
+            symbol: symbol,
+            tokens: tokens,
+            normalizedWeights: normalizedWeights,
+            rateProviders: rateProviders,
+            assetManagers: new address[](tokens.length), // Don't allow asset managers,
+            swapFeePercentage: swapFeePercentage
+          }),
+          getVault(),
+          getProtocolFeePercentagesProvider(),
+          pauseWindowDuration,
+          bufferPeriodDuration,
+          owner
+        ),
+        salt
+      );
+  }
 }
