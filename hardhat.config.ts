@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import { HardhatUserConfig } from 'hardhat/config';
-// import "@nomicfoundation/hardhat-toolbox";
+import '@nomicfoundation/hardhat-toolbox';
 import '@matterlabs/hardhat-zksync-deploy';
 import '@matterlabs/hardhat-zksync-solc';
 
@@ -11,17 +11,17 @@ const config: HardhatUserConfig = {
     compilers: [
       {
         version: '0.7.1',
-        // settings: {
-        //   optimizer: {
-        //     enabled: true,
-        //     runs: 200,
-        //   },
-        // },
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 9999,
+          },
+        },
       },
     ],
   },
   zksolc: {
-    version: '1.3.10',
+    version: '1.3.8',
     compilerSource: 'binary',
     settings: {
       // //compilerPath: "zksolc",  // optional. Ignored for compilerSource "docker". Can be used if compiler is located in a specific folder
@@ -32,10 +32,10 @@ const config: HardhatUserConfig = {
       // libraries:{}, // optional. References to non-inlinable libraries
       // isSystem: false, // optional.  Enables Yul instructions available only for zkSync system contracts and libraries
       // forceEvmla: true, // optional. Falls back to EVM legacy assembly if there is a bug with Yul
-      optimizer: {
-        enabled: false, // optional. True by default
-        // mode: '3' // optional. 3 by default, z to optimize bytecode size
-      },
+      // optimizer: {
+      //   enabled: false, // optional. True by default
+      //   // mode: '3' // optional. 3 by default, z to optimize bytecode size
+      // },
     },
   },
   networks: {

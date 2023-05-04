@@ -1,6 +1,7 @@
 {
   "name": "bal-zksync-shit",
   "scripts": {
+    "start": "npx hardhat node",
     "build": "npx hardhat compile",
     "build:zksync": "rimraf ./artifacts-zk && rimraf ./cache-zk && npx hardhat compile --network zkSyncLocal",
     "test": "npx hardhat test",
