@@ -20,7 +20,7 @@ import "@balancer-labs/v2-interfaces/contracts/pool-weighted/WeightedPoolUserDat
 import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/helpers/InputHelpers.sol";
 
-import "@balancer-labs/v2-pool-utils/contracts/BaseMinimalSwapInfoPool.sol";
+import "../../pool-utils/contracts/BaseMinimalSwapInfoPool.sol";
 import "@balancer-labs/v2-pool-utils/contracts/lib/BasePoolMath.sol";
 
 import "./WeightedMath.sol";

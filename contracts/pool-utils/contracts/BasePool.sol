@@ -408,83 +408,83 @@ abstract contract BasePool is
 
   // Query functions
 
-  // /**
-  //  * @notice "Dry run" `onJoinPool`.
-  //  * @dev Returns the amount of BPT that would be granted to `recipient` if the `onJoinPool` hook were called by the
-  //  * Vault with the same arguments, along with the number of tokens `sender` would have to supply.
-  //  *
-  //  * This function is not meant to be called directly, but rather from a helper contract that fetches current Vault
-  //  * data, such as the protocol swap fee percentage and Pool balances.
-  //  *
-  //  * Like `IVault.queryBatchSwap`, this function is not view due to internal implementation details: the caller must
-  //  * explicitly use eth_call instead of eth_sendTransaction.
-  //  */
-  // function queryJoin(
-  //   bytes32 poolId,
-  //   address sender,
-  //   address recipient,
-  //   uint256[] memory balances,
-  //   uint256 lastChangeBlock,
-  //   uint256 protocolSwapFeePercentage,
-  //   bytes memory userData
-  // ) external override returns (uint256 bptOut, uint256[] memory amountsIn) {
-  //   InputHelpers.ensureInputLengthMatch(balances.length, _getTotalTokens());
+  /**
+   * @notice "Dry run" `onJoinPool`.
+   * @dev Returns the amount of BPT that would be granted to `recipient` if the `onJoinPool` hook were called by the
+   * Vault with the same arguments, along with the number of tokens `sender` would have to supply.
+   *
+   * This function is not meant to be called directly, but rather from a helper contract that fetches current Vault
+   * data, such as the protocol swap fee percentage and Pool balances.
+   *
+   * Like `IVault.queryBatchSwap`, this function is not view due to internal implementation details: the caller must
+   * explicitly use eth_call instead of eth_sendTransaction.
+   */
+  function queryJoin(
+    bytes32 poolId,
+    address sender,
+    address recipient,
+    uint256[] memory balances,
+    uint256 lastChangeBlock,
+    uint256 protocolSwapFeePercentage,
+    bytes memory userData
+  ) external override returns (uint256 bptOut, uint256[] memory amountsIn) {
+    // InputHelpers.ensureInputLengthMatch(balances.length, _getTotalTokens());
 
-  //   _queryAction(
-  //     poolId,
-  //     sender,
-  //     recipient,
-  //     balances,
-  //     lastChangeBlock,
-  //     protocolSwapFeePercentage,
-  //     userData,
-  //     _onJoinPool,
-  //     _downscaleUpArray
-  //   );
+    // _queryAction(
+    //   poolId,
+    //   sender,
+    //   recipient,
+    //   balances,
+    //   lastChangeBlock,
+    //   protocolSwapFeePercentage,
+    //   userData,
+    //   _onJoinPool,
+    //   _downscaleUpArray
+    // );
 
-  //   // The `return` opcode is executed directly inside `_queryAction`, so execution never reaches this statement,
-  //   // and we don't need to return anything here - it just silences compiler warnings.
-  //   return (bptOut, amountsIn);
-  // }
+    // The `return` opcode is executed directly inside `_queryAction`, so execution never reaches this statement,
+    // and we don't need to return anything here - it just silences compiler warnings.
+    return (bptOut, amountsIn);
+  }
 
-  // /**
-  //  * @notice "Dry run" `onExitPool`.
-  //  * @dev Returns the amount of BPT that would be burned from `sender` if the `onExitPool` hook were called by the
-  //  * Vault with the same arguments, along with the number of tokens `recipient` would receive.
-  //  *
-  //  * This function is not meant to be called directly, but rather from a helper contract that fetches current Vault
-  //  * data, such as the protocol swap fee percentage and Pool balances.
-  //  *
-  //  * Like `IVault.queryBatchSwap`, this function is not view due to internal implementation details: the caller must
-  //  * explicitly use eth_call instead of eth_sendTransaction.
-  //  */
-  // function queryExit(
-  //   bytes32 poolId,
-  //   address sender,
-  //   address recipient,
-  //   uint256[] memory balances,
-  //   uint256 lastChangeBlock,
-  //   uint256 protocolSwapFeePercentage,
-  //   bytes memory userData
-  // ) external override returns (uint256 bptIn, uint256[] memory amountsOut) {
-  //   InputHelpers.ensureInputLengthMatch(balances.length, _getTotalTokens());
+  /**
+   * @notice "Dry run" `onExitPool`.
+   * @dev Returns the amount of BPT that would be burned from `sender` if the `onExitPool` hook were called by the
+   * Vault with the same arguments, along with the number of tokens `recipient` would receive.
+   *
+   * This function is not meant to be called directly, but rather from a helper contract that fetches current Vault
+   * data, such as the protocol swap fee percentage and Pool balances.
+   *
+   * Like `IVault.queryBatchSwap`, this function is not view due to internal implementation details: the caller must
+   * explicitly use eth_call instead of eth_sendTransaction.
+   */
+  function queryExit(
+    bytes32 poolId,
+    address sender,
+    address recipient,
+    uint256[] memory balances,
+    uint256 lastChangeBlock,
+    uint256 protocolSwapFeePercentage,
+    bytes memory userData
+  ) external override returns (uint256 bptIn, uint256[] memory amountsOut) {
+    // InputHelpers.ensureInputLengthMatch(balances.length, _getTotalTokens());
 
-  //   _queryAction(
-  //     poolId,
-  //     sender,
-  //     recipient,
-  //     balances,
-  //     lastChangeBlock,
-  //     protocolSwapFeePercentage,
-  //     userData,
-  //     _onExitPool,
-  //     _downscaleDownArray
-  //   );
+    // _queryAction(
+    //   poolId,
+    //   sender,
+    //   recipient,
+    //   balances,
+    //   lastChangeBlock,
+    //   protocolSwapFeePercentage,
+    //   userData,
+    //   _onExitPool,
+    //   _downscaleDownArray
+    // );
 
-  //   // The `return` opcode is executed directly inside `_queryAction`, so execution never reaches this statement,
-  //   // and we don't need to return anything here - it just silences compiler warnings.
-  //   return (bptIn, amountsOut);
-  // }
+    // The `return` opcode is executed directly inside `_queryAction`, so execution never reaches this statement,
+    // and we don't need to return anything here - it just silences compiler warnings.
+    return (bptIn, amountsOut);
+  }
 
   // Internal hooks to be overridden by derived contracts - all token amounts (except BPT) in these interfaces are
   // upscaled.
