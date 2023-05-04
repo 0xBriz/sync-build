@@ -5,7 +5,7 @@ pragma experimental ABIEncoderV2;
 import "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
 import "../../pool-utils/contracts/BaseMinimalSwapInfoPool.sol";
 
-contract BaseWeightedPool is BaseMinimalSwapInfoPool {
+abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
     constructor(
         IVault vault,
         string memory name,
@@ -39,20 +39,28 @@ contract BaseWeightedPool is BaseMinimalSwapInfoPool {
         )
     {}
 
-    function _scalingFactor(IERC20 token) internal view override returns (uint256) {
-        return 1;
-    }
+    function _scalingFactor(IERC20 token) internal view virtual override returns (uint256);
 
-    function _scalingFactors() internal view override returns (uint256[] memory) {
-        return new uint256[](0);
-    }
+    function _scalingFactors() internal view virtual override returns (uint256[] memory);
 
-    function _getTotalTokens() internal view override returns (uint256) {
-        return 0;
-    }
+    function _getTotalTokens() internal view virtual override returns (uint256);
 
-    function _getMaxTokens() internal pure override returns (uint256) {
-        return 0;
+    function _getMaxTokens() internal pure virtual override returns (uint256);
+
+    // Virtual functions
+
+    /**
+     * @dev Returns the normalized weight of `token`. Weights are fixed point numbers that sum to FixedPoint.ONE.
+     */
+    function _getNormalizedWeight(IERC20 token) internal view virtual returns (uint256);
+
+    /**
+     * @dev Returns all normalized weights, in the same order as the Pool's tokens.
+     */
+    function _getNormalizedWeights() internal view virtual returns (uint256[] memory);
+
+    function getNormalizedWeights() external view returns (uint256[] memory) {
+        return _getNormalizedWeights();
     }
 
     // Base Pool handlers
