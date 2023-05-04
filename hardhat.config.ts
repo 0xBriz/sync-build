@@ -40,7 +40,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      // zksync: true,
+      zksync: true,
     },
     zkSyncTestnet: {
       url: "https://testnet.era.zksync.dev", // The testnet RPC URL of zkSync Era network.
