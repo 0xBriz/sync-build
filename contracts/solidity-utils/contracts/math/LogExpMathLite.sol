@@ -439,8 +439,8 @@ library LogExpMathLite {
      * Should only be used if x is between LN_36_LOWER_BOUND and LN_36_UPPER_BOUND.
      */
     function _ln_36(int256 x) private pure returns (int256) {
-        // Since ln(1) = 0, a value of x close to one will yield a very small result,
-        // which makes using 36 digits worthwhile.
+        // Since ln(1) = 0, a value of x close to one will yield a very small result, which makes using 36 digits
+        // worthwhile.
 
         // First, we transform x to a 36 digit fixed point value.
         x *= ONE_18;
@@ -453,6 +453,37 @@ library LogExpMathLite {
         int256 z = ((x - ONE_36) * ONE_36) / (x + ONE_36);
         int256 z_squared = (z * z) / ONE_36;
 
-        return 0;
+        // num is the numerator of the series: the z^(2 * n + 1) term
+        int256 num = z;
+
+        // seriesSum holds the accumulated sum of each term in the series, starting with the initial z
+        int256 seriesSum = num;
+
+        // In each step, the numerator is multiplied by z^2
+        num = (num * z_squared) / ONE_36;
+        seriesSum += num / 3;
+
+        num = (num * z_squared) / ONE_36;
+        seriesSum += num / 5;
+
+        num = (num * z_squared) / ONE_36;
+        seriesSum += num / 7;
+
+        num = (num * z_squared) / ONE_36;
+        seriesSum += num / 9;
+
+        num = (num * z_squared) / ONE_36;
+        seriesSum += num / 11;
+
+        num = (num * z_squared) / ONE_36;
+        seriesSum += num / 13;
+
+        num = (num * z_squared) / ONE_36;
+        seriesSum += num / 15;
+
+        // 8 Taylor terms are sufficient for 36 decimal precision.
+
+        // All that remains is multiplying by 2 (non fixed point).
+        return seriesSum * 2;
     }
 }
