@@ -204,17 +204,19 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
             preJoinExitInvariant,
             getProtocolFeePercentageCache(ProtocolFeeType.SWAP)
         );
-        (uint256 protocolYieldFeesPoolPercentage, uint256 athRateProduct) = _getYieldProtocolFeesPoolPercentage(
-            normalizedWeights
-        );
+        // (uint256 protocolYieldFeesPoolPercentage, uint256 athRateProduct) = _getYieldProtocolFeesPoolPercentage(
+        //     normalizedWeights
+        // );
 
-        return (
-            ExternalFees.bptForPoolOwnershipPercentage(
-                preJoinExitSupply,
-                protocolSwapFeesPoolPercentage + protocolYieldFeesPoolPercentage
-            ),
-            athRateProduct
-        );
+        // return (
+        //     ExternalFees.bptForPoolOwnershipPercentage(
+        //         preJoinExitSupply,
+        //         protocolSwapFeesPoolPercentage + protocolYieldFeesPoolPercentage
+        //     ),
+        //     athRateProduct
+        // );
+
+        return (0, 0);
     }
 
     /**

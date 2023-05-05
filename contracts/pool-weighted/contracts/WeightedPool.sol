@@ -10,7 +10,7 @@ import "@balancer-labs/v2-interfaces/contracts/standalone-utils/IProtocolFeePerc
 import "./BaseWeightedPool.sol";
 import "./WeightedPoolProtocolFees.sol";
 
-// import "./WeightedMath.sol";
+import "./WeightedMath.sol";
 
 import "../../solidity-utils/contracts/math/FixedPointLite.sol";
 
@@ -175,12 +175,6 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
         return _totalTokens;
     }
 
-    function _updatePostJoinExit(
-        uint256 postJoinExitInvariant
-    ) internal virtual override(BaseWeightedPool, WeightedPoolProtocolFees) {
-        WeightedPoolProtocolFees._updatePostJoinExit(postJoinExitInvariant);
-    }
-
     /**
      * @dev Returns the scaling factor for one of the Pool's tokens. Reverts if `token` is not a token registered by the
      * Pool.
@@ -217,6 +211,55 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
         }
 
         return scalingFactors;
+    }
+
+    // Initialize
+
+    function _onInitializePool(
+        bytes32 poolId,
+        address sender,
+        address recipient,
+        uint256[] memory scalingFactors,
+        bytes memory userData
+    ) internal virtual override returns (uint256, uint256[] memory) {
+        // Initialize `_athRateProduct` if the Pool will pay protocol fees on yield.
+        // Not initializing this here properly will cause all joins/exits to revert.
+        if (!_isExemptFromYieldProtocolFees()) _updateATHRateProduct(_getRateProduct(_getNormalizedWeights()));
+
+        return super._onInitializePool(poolId, sender, recipient, scalingFactors, userData);
+    }
+
+    // WeightedPoolProtocolFees functions
+
+    function _beforeJoinExit(
+        uint256[] memory preBalances,
+        uint256[] memory normalizedWeights
+    ) internal virtual override returns (uint256, uint256) {
+        uint256 supplyBeforeFeeCollection = totalSupply();
+        uint256 invariant = WeightedMath._calculateInvariant(normalizedWeights, preBalances);
+        (uint256 protocolFeesToBeMinted, uint256 athRateProduct) = _getPreJoinExitProtocolFees(
+            invariant,
+            normalizedWeights,
+            supplyBeforeFeeCollection
+        );
+
+        // We then update the recorded value of `athRateProduct` to ensure we only collect fees on yield once.
+        // A zero value for `athRateProduct` represents that it is unchanged so we can skip updating it.
+        // if (athRateProduct > 0) {
+        //     _updateATHRateProduct(athRateProduct);
+        // }
+
+        // _payProtocolFees(protocolFeesToBeMinted);
+
+        // return (supplyBeforeFeeCollection.add(protocolFeesToBeMinted), invariant);
+
+        return (0, 0);
+    }
+
+    function _updatePostJoinExit(
+        uint256 postJoinExitInvariant
+    ) internal virtual override(BaseWeightedPool, WeightedPoolProtocolFees) {
+        WeightedPoolProtocolFees._updatePostJoinExit(postJoinExitInvariant);
     }
 
     function _getScalingFactor0() internal view returns (uint256) {
