@@ -4,8 +4,8 @@ pragma experimental ABIEncoderV2;
 
 // import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
 
-import "../../interfaces/contracts/pool-utils/IRateProvider.sol";
-import "../../interfaces/contracts/standalone-utils/IProtocolFeePercentagesProvider.sol";
+import "@balancer-labs/v2-interfaces/contracts/pool-utils/IRateProvider.sol";
+import "@balancer-labs/v2-interfaces/contracts/standalone-utils/IProtocolFeePercentagesProvider.sol";
 
 import "./BaseWeightedPool.sol";
 
