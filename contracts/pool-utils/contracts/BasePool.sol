@@ -21,10 +21,11 @@ import "@balancer-labs/v2-interfaces/contracts/vault/IBasePool.sol";
 
 import "@balancer-labs/v2-solidity-utils/contracts/helpers/InputHelpers.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/helpers/WordCodec.sol";
-import "@balancer-labs/v2-solidity-utils/contracts/helpers/ScalingHelpers.sol";
+import "../../solidity-utils/contracts/helpers/ScalingHelpers.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/helpers/TemporarilyPausable.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/openzeppelin/ERC20.sol";
-import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
+// import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
+import "../../solidity-utils/contracts/math/FixedPointLite.sol";
 import "@balancer-labs/v2-solidity-utils/contracts/math/Math.sol";
 
 import "@balancer-labs/v2-pool-utils/contracts/lib/PoolRegistrationLib.sol";
@@ -64,7 +65,7 @@ abstract contract BasePool is
     RecoveryMode
 {
     using WordCodec for bytes32;
-    using FixedPoint for uint256;
+    using FixedPointLite for uint256;
     using BasePoolUserData for bytes;
 
     uint256 private constant _MIN_TOKENS = 2;

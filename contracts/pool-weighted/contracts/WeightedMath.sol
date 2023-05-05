@@ -2,10 +2,12 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
+// import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
+
+import "../../solidity-utils/contracts/math/FixedPointLite.sol";
 
 library WeightedMath {
-    using FixedPoint for uint256;
+    using FixedPointLite for uint256;
 
     // A minimum normalized weight imposes a maximum weight ratio. We need this due to limitations in the
     // implementation of the power function, as these ratios are often exponents.
@@ -31,20 +33,23 @@ library WeightedMath {
     function _calculateInvariant(
         uint256[] memory normalizedWeights,
         uint256[] memory balances
-    ) internal pure returns (uint256) {
+    ) internal pure returns (uint256 invariant) {
         /**********************************************************************************************
         // invariant               _____                                                             //
         // wi = weight index i      | |      wi                                                      //
         // bi = balance index i     | |  bi ^   = i                                                  //
         // i = invariant                                                                             //
         **********************************************************************************************/
-        uint256 invariant = FixedPoint.ONE;
+        invariant = FixedPointLite.ONE;
         for (uint256 i = 0; i < normalizedWeights.length; i++) {
-            invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
+            // invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
+            invariant = invariant.mulDown(balances[i]);
         }
         _require(invariant > 0, Errors.ZERO_INVARIANT);
 
         return invariant;
+
+        return FixedPointLite.ONE;
     }
 
     // Computes how many tokens can be taken out of a pool if `amountIn` are sent, given the
@@ -71,15 +76,17 @@ library WeightedMath {
         // The multiplication rounds down, and the subtrahend (power) rounds up (so the base rounds up too).
         // Because bI / (bI + aI) <= 1, the exponent rounds down.
 
-        // Cannot exceed maximum in ratio
-        _require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
+        // // Cannot exceed maximum in ratio
+        // _require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
 
-        uint256 denominator = balanceIn.add(amountIn);
-        uint256 base = balanceIn.divUp(denominator);
-        uint256 exponent = weightIn.divDown(weightOut);
-        uint256 power = base.powUp(exponent);
+        // uint256 denominator = balanceIn.add(amountIn);
+        // uint256 base = balanceIn.divUp(denominator);
+        // uint256 exponent = weightIn.divDown(weightOut);
+        // uint256 power = base.powUp(exponent);
 
-        return balanceOut.mulDown(power.complement());
+        // return balanceOut.mulDown(power.complement());
+
+        return FixedPointLite.ONE;
     }
 
     // Computes how many tokens must be sent to a pool in order to take `amountOut`, given the
@@ -106,17 +113,20 @@ library WeightedMath {
         // The multiplication rounds up, and the power rounds up (so the base rounds up too).
         // Because b0 / (b0 - a0) >= 1, the exponent rounds up.
 
-        // Cannot exceed maximum out ratio
-        _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
+        // // Cannot exceed maximum out ratio
+        // _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 
-        uint256 base = balanceOut.divUp(balanceOut.sub(amountOut));
-        uint256 exponent = weightOut.divUp(weightIn);
-        uint256 power = base.powUp(exponent);
+        // uint256 base = balanceOut.divUp(balanceOut.sub(amountOut));
+        // uint256 exponent = weightOut.divUp(weightIn);
+        // uint256 power = base.powUp(exponent);
 
-        // Because the base is larger than one (and the power rounds up), the power should always be larger than one, so
-        // the following subtraction should never revert.
-        uint256 ratio = power.sub(FixedPoint.ONE);
+        // // Because the base is larger than one (and the power rounds up),
+        // the power should always be larger than one, so
+        // // the following subtraction should never revert.
+        // uint256 ratio = power.sub(FixedPoint.ONE);
 
-        return balanceIn.mulUp(ratio);
+        // return balanceIn.mulUp(ratio);
+
+        return FixedPointLite.ONE;
     }
 }

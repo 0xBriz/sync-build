@@ -2,7 +2,7 @@
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
+// import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
 
 import "../../interfaces/contracts/pool-utils/IRateProvider.sol";
 import "../../interfaces/contracts/standalone-utils/IProtocolFeePercentagesProvider.sol";
@@ -11,8 +11,10 @@ import "./BaseWeightedPool.sol";
 
 // import "./WeightedMath.sol";
 
+import "../../solidity-utils/contracts/math/FixedPointLite.sol";
+
 contract WeightedPool is BaseWeightedPool {
-    using FixedPoint for uint256;
+    using FixedPointLite for uint256;
 
     uint256 private constant _MAX_TOKENS = 8;
 
@@ -90,7 +92,7 @@ contract WeightedPool is BaseWeightedPool {
         for (uint8 i = 0; i < numTokens; i++) {
             uint256 normalizedWeight = params.normalizedWeights[i];
 
-            //  _require(normalizedWeight >= WeightedMath._MIN_WEIGHT, Errors.MIN_WEIGHT);
+            _require(normalizedWeight >= WeightedMath._MIN_WEIGHT, Errors.MIN_WEIGHT);
             normalizedSum = normalizedSum.add(normalizedWeight);
         }
         // Ensure that the normalized weights sum to ONE
