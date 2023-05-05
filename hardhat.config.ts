@@ -21,7 +21,7 @@ const config: HardhatUserConfig = {
     ],
   },
   zksolc: {
-    version: '1.3.10',
+    version: '1.3.8',
     compilerSource: 'binary',
     settings: {
       // //compilerPath: "zksolc",  // optional. Ignored for compilerSource "docker". Can be used if compiler is located in a specific folder

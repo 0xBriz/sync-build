@@ -288,7 +288,6 @@ library FixedPointLite {
             // We only handle positive exponents: e^(-x) is computed as 1 / e^x. We can safely make x positive since it
             // fits in the signed 256 bit range (as it is larger than MIN_NATURAL_EXPONENT).
             // Fixed point division requires multiplying by ONE_18.
-            /// @note "recursive"  here
             //  return ((ONE_18 * ONE_18) / exp(-x));
         }
 
@@ -419,7 +418,6 @@ library FixedPointLite {
         return (((product * seriesSum) / ONE_20) * firstAN) / 100;
     }
 
-    /// @note "recursive" call mentioned in comment here
     function _ln(int256 a) internal pure returns (int256) {
         // if (a < ONE_18) {
         //     // Since ln(a^k) = k * ln(a), we can compute ln(a) as ln(a) = ln((1/a)^(-1)) = - ln((1/a)). If a is less
