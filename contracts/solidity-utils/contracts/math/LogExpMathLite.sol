@@ -129,15 +129,13 @@ library LogExpMathLite {
         }
         logx_times_y /= ONE_18;
 
-        // // Finally, we compute exp(y * ln(x)) to arrive at x^y
-        // _require(
-        //     MIN_NATURAL_EXPONENT <= logx_times_y && logx_times_y <= MAX_NATURAL_EXPONENT,
-        //     Errors.PRODUCT_OUT_OF_BOUNDS
-        // );
+        // Finally, we compute exp(y * ln(x)) to arrive at x^y
+        _require(
+            MIN_NATURAL_EXPONENT <= logx_times_y && logx_times_y <= MAX_NATURAL_EXPONENT,
+            Errors.PRODUCT_OUT_OF_BOUNDS
+        );
 
-        // return uint256(exp(logx_times_y));
-
-        return 0;
+        return uint256(exp(logx_times_y));
     }
 
     /**
@@ -152,9 +150,14 @@ library LogExpMathLite {
             // We only handle positive exponents: e^(-x) is computed as 1 / e^x. We can safely make x positive since it
             // fits in the signed 256 bit range (as it is larger than MIN_NATURAL_EXPONENT).
             // Fixed point division requires multiplying by ONE_18.
-            //  return ((ONE_18 * ONE_18) / exp(-x));
+            return ((ONE_18 * ONE_18) / _expWork(-x));
         }
 
+        return _expWork(x);
+    }
+
+    function _expWork(int256 x) private pure returns (int256) {
+        require(x >= 0, "_expWork: x is negative");
         // First, we use the fact that e^(x+y) = e^x * e^y to decompose x into a sum of powers of two, which we call x_n,
         // where x_n == 2^(7 - n), and e^x_n = a_n has been precomputed. We choose the first x_n, x0, to equal 2^7
         // because all larger powers are larger than MAX_NATURAL_EXPONENT, and therefore not present in the
