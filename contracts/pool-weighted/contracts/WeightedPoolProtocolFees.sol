@@ -209,15 +209,13 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
             normalizedWeights
         );
 
-        // return (
-        //     ExternalFees.bptForPoolOwnershipPercentage(
-        //         preJoinExitSupply,
-        //         protocolSwapFeesPoolPercentage + protocolYieldFeesPoolPercentage
-        //     ),
-        //     athRateProduct
-        // );
-
-        return (0, 0);
+        return (
+            ExternalFees.bptForPoolOwnershipPercentage(
+                preJoinExitSupply,
+                protocolSwapFeesPoolPercentage + protocolYieldFeesPoolPercentage
+            ),
+            athRateProduct
+        );
     }
 
     /**
