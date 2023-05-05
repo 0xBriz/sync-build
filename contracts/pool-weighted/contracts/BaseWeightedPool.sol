@@ -91,16 +91,14 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
         uint256 currentBalanceTokenIn,
         uint256 currentBalanceTokenOut
     ) internal virtual override returns (uint256) {
-        // return
-        //     WeightedMath._calcOutGivenIn(
-        //         currentBalanceTokenIn,
-        //         _getNormalizedWeight(swapRequest.tokenIn),
-        //         currentBalanceTokenOut,
-        //         _getNormalizedWeight(swapRequest.tokenOut),
-        //         swapRequest.amount
-        //     );
-
-        return 0;
+        return
+            WeightedMath._calcOutGivenIn(
+                currentBalanceTokenIn,
+                _getNormalizedWeight(swapRequest.tokenIn),
+                currentBalanceTokenOut,
+                _getNormalizedWeight(swapRequest.tokenOut),
+                swapRequest.amount
+            );
     }
 
     function _onSwapGivenOut(
@@ -108,16 +106,14 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
         uint256 currentBalanceTokenIn,
         uint256 currentBalanceTokenOut
     ) internal virtual override returns (uint256) {
-        // return
-        //     WeightedMath._calcInGivenOut(
-        //         currentBalanceTokenIn,
-        //         _getNormalizedWeight(swapRequest.tokenIn),
-        //         currentBalanceTokenOut,
-        //         _getNormalizedWeight(swapRequest.tokenOut),
-        //         swapRequest.amount
-        //     );
-
-        return 0;
+        return
+            WeightedMath._calcInGivenOut(
+                currentBalanceTokenIn,
+                _getNormalizedWeight(swapRequest.tokenIn),
+                currentBalanceTokenOut,
+                _getNormalizedWeight(swapRequest.tokenOut),
+                swapRequest.amount
+            );
     }
 
     // Initialize
