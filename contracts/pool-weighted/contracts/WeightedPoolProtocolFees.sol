@@ -4,10 +4,10 @@ pragma experimental ABIEncoderV2;
 
 import "@balancer-labs/v2-interfaces/contracts/pool-utils/IRateProvider.sol";
 import "@balancer-labs/v2-pool-utils/contracts/external-fees/ProtocolFeeCache.sol";
-
+import "../../pool-utils/contracts/external-fees/InvariantGrowthProtocolSwapFees.sol";
 import "./BaseWeightedPool.sol";
 
-abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache {
+abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache, IRateProvider {
     // Rate providers are used only for computing yield fees; they do not inform swap/join/exit.
     IRateProvider internal immutable _rateProvider0;
     IRateProvider internal immutable _rateProvider1;
