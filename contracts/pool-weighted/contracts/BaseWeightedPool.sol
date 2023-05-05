@@ -13,6 +13,7 @@ import "./WeightedMath.sol";
 
 abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
     using FixedPointLite for uint256;
+    using BasePoolUserData for bytes;
     using WeightedPoolUserData for bytes;
 
     constructor(
@@ -46,7 +47,9 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
             bufferPeriodDuration,
             owner
         )
-    {}
+    {
+        // solhint-disable-previous-line no-empty-blocks
+    }
 
     function _scalingFactor(IERC20 token) internal view virtual override returns (uint256);
 
@@ -68,23 +71,22 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
      */
     function _getNormalizedWeights() internal view virtual returns (uint256[] memory);
 
-    function getNormalizedWeights() external view returns (uint256[] memory) {
-        return _getNormalizedWeights();
-    }
-
     /**
      * @dev Returns the current value of the invariant.
      */
     function getInvariant() public view returns (uint256) {
         (, uint256[] memory balances, ) = getVault().getPoolTokens(getPoolId());
 
-        // // Since the Pool hooks always work with upscaled balances, we manually
-        // // upscale here for consistency
+        // Since the Pool hooks always work with upscaled balances, we manually
+        // upscale here for consistency
         _upscaleArray(balances, _scalingFactors());
 
         uint256[] memory normalizedWeights = _getNormalizedWeights();
-
         return WeightedMath._calculateInvariant(normalizedWeights, balances);
+    }
+
+    function getNormalizedWeights() external view returns (uint256[] memory) {
+        return _getNormalizedWeights();
     }
 
     // Base Pool handlers
@@ -449,7 +451,7 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
         uint256 totalSupply,
         bytes memory userData
     ) internal pure override returns (uint256 bptAmountIn, uint256[] memory amountsOut) {
-        // bptAmountIn = userData.recoveryModeExit();
-        // amountsOut = BasePoolMath.computeProportionalAmountsOut(balances, totalSupply, bptAmountIn);
+        bptAmountIn = userData.recoveryModeExit();
+        amountsOut = BasePoolMath.computeProportionalAmountsOut(balances, totalSupply, bptAmountIn);
     }
 }
