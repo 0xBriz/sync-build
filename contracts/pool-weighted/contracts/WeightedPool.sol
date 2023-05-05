@@ -246,15 +246,13 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
 
         // We then update the recorded value of `athRateProduct` to ensure we only collect fees on yield once.
         // A zero value for `athRateProduct` represents that it is unchanged so we can skip updating it.
-        // if (athRateProduct > 0) {
-        //     _updateATHRateProduct(athRateProduct);
-        // }
+        if (athRateProduct > 0) {
+            _updateATHRateProduct(athRateProduct);
+        }
 
-        // _payProtocolFees(protocolFeesToBeMinted);
+        _payProtocolFees(protocolFeesToBeMinted);
 
-        // return (supplyBeforeFeeCollection.add(protocolFeesToBeMinted), invariant);
-
-        return (0, 0);
+        return (supplyBeforeFeeCollection.add(protocolFeesToBeMinted), invariant);
     }
 
     function _updatePostJoinExit(
