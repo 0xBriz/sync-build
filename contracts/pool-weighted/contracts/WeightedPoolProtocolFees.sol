@@ -7,7 +7,7 @@ import "@balancer-labs/v2-pool-utils/contracts/external-fees/ProtocolFeeCache.so
 
 import "./BaseWeightedPool.sol";
 
-abstract contract WeightedPoolProtocolFees is BaseWeightedPool {
+abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache {
     // Rate providers are used only for computing yield fees; they do not inform swap/join/exit.
     IRateProvider internal immutable _rateProvider0;
     IRateProvider internal immutable _rateProvider1;
@@ -45,5 +45,11 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool {
             }
         }
         return true;
+    }
+
+    function _isOwnerOnlyAction(
+        bytes32 actionId
+    ) internal view virtual override(BasePool, BasePoolAuthorization) returns (bool) {
+        return super._isOwnerOnlyAction(actionId);
     }
 }
