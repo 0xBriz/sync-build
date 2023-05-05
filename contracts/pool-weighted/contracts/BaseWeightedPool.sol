@@ -5,11 +5,14 @@ pragma experimental ABIEncoderV2;
 import "@balancer-labs/v2-interfaces/contracts/vault/IVault.sol";
 import "../../pool-utils/contracts/BaseMinimalSwapInfoPool.sol";
 import "../../solidity-utils/contracts/helpers/ScalingHelpers.sol";
-// import "@balancer-labs/v2-solidity-utils/contracts/math/FixedPoint.sol";
-
+import "../../solidity-utils/contracts/math/FixedPointLite.sol";
+import "../../interfaces/contracts/pool-weighted/WeightedPoolUserData.sol";
 import "./WeightedMath.sol";
 
 abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
+    using FixedPointLite for uint256;
+    using WeightedPoolUserData for bytes;
+
     constructor(
         IVault vault,
         string memory _name,
@@ -116,6 +119,30 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
             );
     }
 
+    /**
+     * @dev Called after any regular join or exit operation. Empty by default, but derived contracts
+     * may choose to add custom behavior at these steps. This often has to do with protocol fee processing.
+     *
+     * If performing a join operation, balanceDeltas are the amounts in: otherwise they are the amounts out.
+     *
+     * This function is free to mutate the `preBalances` array.
+     */
+    function _afterJoinExit(
+        uint256 preJoinExitInvariant,
+        uint256[] memory preBalances,
+        uint256[] memory balanceDeltas,
+        uint256[] memory normalizedWeights,
+        uint256 preJoinExitSupply,
+        uint256 postJoinExitSupply
+    ) internal virtual {
+        // solhint-disable-previous-line no-empty-blocks
+    }
+
+    // Derived contracts may call this to update state after a join or exit.
+    function _updatePostJoinExit(uint256 postJoinExitInvariant) internal virtual {
+        // solhint-disable-previous-line no-empty-blocks
+    }
+
     // Initialize
 
     function _onInitializePool(
@@ -125,28 +152,26 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
         uint256[] memory scalingFactors,
         bytes memory userData
     ) internal virtual override returns (uint256, uint256[] memory) {
-        // WeightedPoolUserData.JoinKind kind = userData.joinKind();
-        // _require(kind == WeightedPoolUserData.JoinKind.INIT, Errors.UNINITIALIZED);
+        WeightedPoolUserData.JoinKind kind = userData.joinKind();
+        _require(kind == WeightedPoolUserData.JoinKind.INIT, Errors.UNINITIALIZED);
 
-        // uint256[] memory amountsIn = userData.initialAmountsIn();
-        // InputHelpers.ensureInputLengthMatch(amountsIn.length, scalingFactors.length);
-        // _upscaleArray(amountsIn, scalingFactors);
+        uint256[] memory amountsIn = userData.initialAmountsIn();
+        InputHelpers.ensureInputLengthMatch(amountsIn.length, scalingFactors.length);
+        _upscaleArray(amountsIn, scalingFactors);
 
-        // uint256[] memory normalizedWeights = _getNormalizedWeights();
-        // uint256 invariantAfterJoin = WeightedMath._calculateInvariant(normalizedWeights, amountsIn);
+        uint256[] memory normalizedWeights = _getNormalizedWeights();
+        uint256 invariantAfterJoin = WeightedMath._calculateInvariant(normalizedWeights, amountsIn);
 
-        // // Set the initial BPT to the value of the invariant times the number of tokens. This makes BPT supply more
-        // // consistent in Pools with similar compositions but different number of tokens.
-        // uint256 bptAmountOut = Math.mul(invariantAfterJoin, amountsIn.length);
+        // Set the initial BPT to the value of the invariant times the number of tokens. This makes BPT supply more
+        // consistent in Pools with similar compositions but different number of tokens.
+        uint256 bptAmountOut = Math.mul(invariantAfterJoin, amountsIn.length);
 
-        // // Initialization is still a join, so we need to do post-join work. Since we are not paying protocol fees,
-        // // and all we need to do is update the invariant,
+        // Initialization is still a join, so we need to do post-join work. Since we are not paying protocol fees,
+        // and all we need to do is update the invariant,
         // call `_updatePostJoinExit` here instead of `_afterJoinExit`.
-        // _updatePostJoinExit(invariantAfterJoin);
+        _updatePostJoinExit(invariantAfterJoin);
 
-        // return (bptAmountOut, amountsIn);
-
-        return (0, new uint256[](0));
+        return (bptAmountOut, amountsIn);
     }
 
     // Join
