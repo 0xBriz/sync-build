@@ -8,6 +8,9 @@ import "../../pool-utils/contracts/external-fees/InvariantGrowthProtocolSwapFees
 import "./BaseWeightedPool.sol";
 
 abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache, IRateProvider {
+    using FixedPointLite for uint256;
+    using WordCodec for bytes32;
+
     // Rate providers are used only for computing yield fees; they do not inform swap/join/exit.
     IRateProvider internal immutable _rateProvider0;
     IRateProvider internal immutable _rateProvider1;
@@ -19,6 +22,22 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
     IRateProvider internal immutable _rateProvider7;
 
     bool internal immutable _exemptFromYieldFees;
+
+    // All-time high value of the weighted product of the pool's token rates. Comparing such weighted products across
+    // time provides a measure of the pool's growth resulting from rate changes. The pool also grows due to swap fees,
+    // but that growth is captured in the invariant; rate growth is not.
+    uint256 private _athRateProduct;
+
+    // This Pool pays protocol fees by measuring the growth of the invariant between joins and exits. Since weights are
+    // immutable, the invariant only changes due to accumulated swap fees, which saves gas by freeing the Pool
+    // from performing any computation or accounting associated with protocol fees during swaps.
+    // This mechanism requires keeping track of the invariant after the last join or exit.
+    //
+    // The maximum value of the invariant is the maximum allowable balance in the Vault (2**112) multiplied by the
+    // largest possible scaling factor (10**18 for a zero decimals token). The largest invariant is then
+    // 2**112 * 10**18 ~= 2**172, which means that to save gas we can place this in BasePool's `_miscData`.
+    uint256 private constant _LAST_POST_JOINEXIT_INVARIANT_OFFSET = 0;
+    uint256 private constant _LAST_POST_JOINEXIT_INVARIANT_BIT_LENGTH = 192;
 
     constructor(uint256 numTokens, IRateProvider[] memory rateProviders) {
         _require(numTokens <= 8, Errors.MAX_TOKENS);
@@ -45,6 +64,29 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
             }
         }
         return true;
+    }
+
+    /**
+     * @dev Returns whether the pool is exempt from protocol fees on yield.
+     */
+    function _isExemptFromYieldProtocolFees() internal view returns (bool) {
+        return _exemptFromYieldFees;
+    }
+
+    /**
+     * @notice Returns the value of the invariant after the last join or exit operation.
+     */
+    function getLastPostJoinExitInvariant() public view returns (uint256) {
+        return
+            _getMiscData().decodeUint(_LAST_POST_JOINEXIT_INVARIANT_OFFSET, _LAST_POST_JOINEXIT_INVARIANT_BIT_LENGTH);
+    }
+
+    /**
+     * @notice Returns the all time high value for the weighted product of the Pool's tokens' rates.
+     * @dev Yield protocol fees are only charged when this value is exceeded.
+     */
+    function getATHRateProduct() public view returns (uint256) {
+        return _athRateProduct;
     }
 
     function _isOwnerOnlyAction(
