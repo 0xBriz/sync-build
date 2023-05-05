@@ -265,13 +265,15 @@ library FixedPointLite {
         }
         logx_times_y /= ONE_18;
 
-        // Finally, we compute exp(y * ln(x)) to arrive at x^y
-        _require(
-            MIN_NATURAL_EXPONENT <= logx_times_y && logx_times_y <= MAX_NATURAL_EXPONENT,
-            Errors.PRODUCT_OUT_OF_BOUNDS
-        );
+        // // Finally, we compute exp(y * ln(x)) to arrive at x^y
+        // _require(
+        //     MIN_NATURAL_EXPONENT <= logx_times_y && logx_times_y <= MAX_NATURAL_EXPONENT,
+        //     Errors.PRODUCT_OUT_OF_BOUNDS
+        // );
 
-        return uint256(exp(logx_times_y));
+        // return uint256(exp(logx_times_y));
+
+        return 0;
     }
 
     /**
@@ -286,6 +288,7 @@ library FixedPointLite {
             // We only handle positive exponents: e^(-x) is computed as 1 / e^x. We can safely make x positive since it
             // fits in the signed 256 bit range (as it is larger than MIN_NATURAL_EXPONENT).
             // Fixed point division requires multiplying by ONE_18.
+            /// @note "recursive"  here
             //  return ((ONE_18 * ONE_18) / exp(-x));
         }
 
@@ -416,13 +419,16 @@ library FixedPointLite {
         return (((product * seriesSum) / ONE_20) * firstAN) / 100;
     }
 
+    /// @note "recursive" call mentioned in comment here
     function _ln(int256 a) internal pure returns (int256) {
-        if (a < ONE_18) {
-            // Since ln(a^k) = k * ln(a), we can compute ln(a) as ln(a) = ln((1/a)^(-1)) = - ln((1/a)). If a is less
-            // than one, 1/a will be greater than one, and this if statement will not be entered in the recursive call.
-            // Fixed point division requires multiplying by ONE_18.
-            return (-_ln((ONE_18 * ONE_18) / a));
-        }
+        // if (a < ONE_18) {
+        //     // Since ln(a^k) = k * ln(a), we can compute ln(a) as ln(a) = ln((1/a)^(-1)) = - ln((1/a)). If a is less
+        //     // than one, 1/a will be greater than one, and this if statement will not be entered in the recursive call.
+        //     // Fixed point division requires multiplying by ONE_18.
+        //     return (-_ln((ONE_18 * ONE_18) / a));
+        // }
+
+        return 0;
     }
 
     /**
@@ -445,5 +451,7 @@ library FixedPointLite {
         // division by ONE_36.
         int256 z = ((x - ONE_36) * ONE_36) / (x + ONE_36);
         int256 z_squared = (z * z) / ONE_36;
+
+        return 0;
     }
 }
