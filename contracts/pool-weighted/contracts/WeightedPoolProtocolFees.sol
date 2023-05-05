@@ -89,6 +89,150 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
         return _athRateProduct;
     }
 
+    function getRateProviders() external view returns (IRateProvider[] memory) {
+        uint256 totalTokens = _getTotalTokens();
+        IRateProvider[] memory providers = new IRateProvider[](totalTokens);
+
+        // prettier-ignore
+        {
+            providers[0] = _rateProvider0;
+            providers[1] = _rateProvider1;
+            if (totalTokens > 2) { providers[2] = _rateProvider2; } else { return providers; }
+            if (totalTokens > 3) { providers[3] = _rateProvider3; } else { return providers; }
+            if (totalTokens > 4) { providers[4] = _rateProvider4; } else { return providers; }
+            if (totalTokens > 5) { providers[5] = _rateProvider5; } else { return providers; }
+            if (totalTokens > 6) { providers[6] = _rateProvider6; } else { return providers; }
+            if (totalTokens > 7) { providers[7] = _rateProvider7; } else { return providers; }
+        }
+
+        return providers;
+    }
+
+    // Protocol Fees
+
+    /**
+     * @dev Returns the percentage of the Pool's supply which corresponds to protocol fees on swaps accrued by the Pool.
+     * @param preJoinExitInvariant - The Pool's invariant prior to the join/exit *before* minting protocol fees.
+     * @param protocolSwapFeePercentage - The percentage of swap fees which are paid to the protocol.
+     * @return swapProtocolFeesPercentage - The percentage of the Pool which corresponds to protocol fees on swaps.
+     */
+    function _getSwapProtocolFeesPoolPercentage(
+        uint256 preJoinExitInvariant,
+        uint256 protocolSwapFeePercentage
+    ) internal view returns (uint256) {
+        // Before joins and exits, we measure the growth of the invariant compared to the invariant after the last join
+        // or exit, which will have been caused by swap fees, and use it to mint BPT as protocol fees. This dilutes all
+        // LPs, which means that new LPs will join the pool debt-free, and exiting LPs will pay any amounts due
+        // before leaving.
+
+        return
+            InvariantGrowthProtocolSwapFees.getProtocolOwnershipPercentage(
+                preJoinExitInvariant.divDown(getLastPostJoinExitInvariant()),
+                FixedPoint.ONE, // Supply has not changed so supplyGrowthRatio = 1
+                protocolSwapFeePercentage
+            );
+    }
+
+    /**
+     * @dev Returns the percentage of the Pool's supply which corresponds to protocol fees on yield accrued by the Pool.
+     * @param normalizedWeights - The Pool's normalized token weights.
+     * @return yieldProtocolFeesPercentage - The percentage of the Pool which corresponds to protocol fees on yield.
+     * @return athRateProduct - The new all-time-high rate product if it has increased, otherwise zero.
+     */
+    function _getYieldProtocolFeesPoolPercentage(
+        uint256[] memory normalizedWeights
+    ) internal view returns (uint256, uint256) {
+        if (_isExemptFromYieldProtocolFees()) return (0, 0);
+
+        // Yield manifests in the Pool by individual tokens becoming more valuable, we convert this into comparable
+        // units by applying a rate to get the equivalent balance of non-yield-bearing tokens
+        //
+        // non-yield-bearing balance = rate * yield-bearing balance
+        //                       x'i = ri * xi
+        //
+        // To measure the amount of fees to pay due to yield, we take advantage of the fact that scaling the
+        // Pool's balances results in a scaling factor being applied to the original invariant.
+        //
+        // I(r1 * x1, r2 * x2) = (r1 * x1)^w1 * (r2 * x2)^w2
+        //                     = (r1)^w1 * (r2)^w2 * (x1)^w1 * (x2)^w2
+        //                     = I(r1, r2) * I(x1, x2)
+        //
+        // We then only need to measure the growth of this scaling factor to measure how the value of the BPT token
+        // increases due to yield; we can ignore the invariant calculated from the Pool's balances as these cancel.
+        // We then have the result:
+        //
+        // invariantGrowthRatio = I(r1_new, r2_new) / I(r1_old, r2_old) = rateProduct / athRateProduct
+
+        uint256 athRateProduct = _athRateProduct;
+        uint256 rateProduct = _getRateProduct(normalizedWeights);
+
+        // Only charge yield fees if we've exceeded the all time high of Pool value generated through yield.
+        // i.e. if the Pool makes a loss through the yield strategies then it shouldn't charge fees until it's
+        // been recovered.
+        if (rateProduct <= athRateProduct) return (0, 0);
+
+        return (
+            InvariantGrowthProtocolSwapFees.getProtocolOwnershipPercentage(
+                rateProduct.divDown(athRateProduct),
+                FixedPoint.ONE, // Supply has not changed so supplyGrowthRatio = 1
+                getProtocolFeePercentageCache(ProtocolFeeType.YIELD)
+            ),
+            rateProduct
+        );
+    }
+
+    // Helper functions
+
+    /**
+     * @notice Returns the contribution to the total rate product from a token with the given weight and rate provider.
+     */
+    function _getRateFactor(uint256 normalizedWeight, IRateProvider provider) internal view returns (uint256) {
+        return provider == IRateProvider(0) ? FixedPoint.ONE : provider.getRate().powDown(normalizedWeight);
+    }
+
+    /**
+     * @dev Returns the weighted product of all the token rates.
+     */
+    function _getRateProduct(uint256[] memory normalizedWeights) internal view returns (uint256) {
+        uint256 totalTokens = normalizedWeights.length;
+
+        uint256 rateProduct = FixedPoint.mulDown(
+            _getRateFactor(normalizedWeights[0], _rateProvider0),
+            _getRateFactor(normalizedWeights[1], _rateProvider1)
+        );
+
+        if (totalTokens > 2) {
+            rateProduct = rateProduct.mulDown(_getRateFactor(normalizedWeights[2], _rateProvider2));
+        } else {
+            return rateProduct;
+        }
+        if (totalTokens > 3) {
+            rateProduct = rateProduct.mulDown(_getRateFactor(normalizedWeights[3], _rateProvider3));
+        } else {
+            return rateProduct;
+        }
+        if (totalTokens > 4) {
+            rateProduct = rateProduct.mulDown(_getRateFactor(normalizedWeights[4], _rateProvider4));
+        } else {
+            return rateProduct;
+        }
+        if (totalTokens > 5) {
+            rateProduct = rateProduct.mulDown(_getRateFactor(normalizedWeights[5], _rateProvider5));
+        } else {
+            return rateProduct;
+        }
+        if (totalTokens > 6) {
+            rateProduct = rateProduct.mulDown(_getRateFactor(normalizedWeights[6], _rateProvider6));
+        } else {
+            return rateProduct;
+        }
+        if (totalTokens > 7) {
+            rateProduct = rateProduct.mulDown(_getRateFactor(normalizedWeights[7], _rateProvider7));
+        }
+
+        return rateProduct;
+    }
+
     function _isOwnerOnlyAction(
         bytes32 actionId
     ) internal view virtual override(BasePool, BasePoolAuthorization) returns (bool) {
