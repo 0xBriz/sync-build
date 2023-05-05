@@ -170,16 +170,16 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
         // Only charge yield fees if we've exceeded the all time high of Pool value generated through yield.
         // i.e. if the Pool makes a loss through the yield strategies then it shouldn't charge fees until it's
         // been recovered.
-        // if (rateProduct <= athRateProduct) return (0, 0);
+        if (rateProduct <= athRateProduct) return (0, 0);
 
-        // return (
-        //     InvariantGrowthProtocolSwapFees.getProtocolOwnershipPercentage(
-        //         rateProduct.divDown(athRateProduct),
-        //         FixedPoint.ONE, // Supply has not changed so supplyGrowthRatio = 1
-        //         getProtocolFeePercentageCache(ProtocolFeeType.YIELD)
-        //     ),
-        //     rateProduct
-        // );
+        return (
+            InvariantGrowthProtocolSwapFees.getProtocolOwnershipPercentage(
+                rateProduct.divDown(athRateProduct),
+                FixedPoint.ONE, // Supply has not changed so supplyGrowthRatio = 1
+                getProtocolFeePercentageCache(ProtocolFeeType.YIELD)
+            ),
+            rateProduct
+        );
     }
 
     function _updateATHRateProduct(uint256 rateProduct) internal {
