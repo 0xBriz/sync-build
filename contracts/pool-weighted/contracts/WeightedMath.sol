@@ -42,7 +42,7 @@ library WeightedMath {
         **********************************************************************************************/
         invariant = FixedPointLite.ONE;
         for (uint256 i = 0; i < normalizedWeights.length; i++) {
-            invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
+            // invariant = invariant.mulDown(balances[i].powDown(normalizedWeights[i]));
             // invariant = invariant.mulDown(balances[i]);
         }
         _require(invariant > 0, Errors.ZERO_INVARIANT);
@@ -74,17 +74,15 @@ library WeightedMath {
         // The multiplication rounds down, and the subtrahend (power) rounds up (so the base rounds up too).
         // Because bI / (bI + aI) <= 1, the exponent rounds down.
 
-        // // Cannot exceed maximum in ratio
-        // _require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
+        // Cannot exceed maximum in ratio
+        _require(amountIn <= balanceIn.mulDown(_MAX_IN_RATIO), Errors.MAX_IN_RATIO);
 
-        // uint256 denominator = balanceIn.add(amountIn);
-        // uint256 base = balanceIn.divUp(denominator);
-        // uint256 exponent = weightIn.divDown(weightOut);
-        // uint256 power = base.powUp(exponent);
+        uint256 denominator = balanceIn.add(amountIn);
+        uint256 base = balanceIn.divUp(denominator);
+        uint256 exponent = weightIn.divDown(weightOut);
+        uint256 power = base.powUp(exponent);
 
-        // return balanceOut.mulDown(power.complement());
-
-        return FixedPointLite.ONE;
+        return balanceOut.mulDown(power.complement());
     }
 
     // Computes how many tokens must be sent to a pool in order to take `amountOut`, given the
@@ -111,20 +109,18 @@ library WeightedMath {
         // The multiplication rounds up, and the power rounds up (so the base rounds up too).
         // Because b0 / (b0 - a0) >= 1, the exponent rounds up.
 
-        // // Cannot exceed maximum out ratio
-        // _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
+        // Cannot exceed maximum out ratio
+        _require(amountOut <= balanceOut.mulDown(_MAX_OUT_RATIO), Errors.MAX_OUT_RATIO);
 
-        // uint256 base = balanceOut.divUp(balanceOut.sub(amountOut));
-        // uint256 exponent = weightOut.divUp(weightIn);
-        // uint256 power = base.powUp(exponent);
+        uint256 base = balanceOut.divUp(balanceOut.sub(amountOut));
+        uint256 exponent = weightOut.divUp(weightIn);
+        uint256 power = base.powUp(exponent);
 
-        // // Because the base is larger than one (and the power rounds up),
+        // Because the base is larger than one (and the power rounds up),
         // the power should always be larger than one, so
-        // // the following subtraction should never revert.
-        // uint256 ratio = power.sub(FixedPoint.ONE);
+        // the following subtraction should never revert.
+        uint256 ratio = power.sub(FixedPointLite.ONE);
 
-        // return balanceIn.mulUp(ratio);
-
-        return FixedPointLite.ONE;
+        return balanceIn.mulUp(ratio);
     }
 }

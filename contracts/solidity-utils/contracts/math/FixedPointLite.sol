@@ -167,8 +167,8 @@ library FixedPointLite {
             uint256 square = mulDown(x, x);
             return mulDown(square, square);
         } else {
-            // uint256 raw = LogExpMathLite.pow(x, y);
-            uint256 raw = 0;
+            uint256 raw = _pow(x, y);
+            // uint256 raw = 0;
             uint256 maxError = add(mulUp(raw, MAX_POW_RELATIVE_ERROR), 1);
 
             if (raw < maxError) {
@@ -194,8 +194,8 @@ library FixedPointLite {
             uint256 square = mulUp(x, x);
             return mulUp(square, square);
         } else {
-            // uint256 raw = LogExpMathLite.pow(x, y);
-            uint256 raw = 0;
+            uint256 raw = _pow(x, y);
+            // uint256 raw = 0;
             uint256 maxError = add(mulUp(raw, MAX_POW_RELATIVE_ERROR), 1);
 
             return add(raw, maxError);
@@ -226,7 +226,7 @@ library FixedPointLite {
      *
      * Reverts if ln(x) * y is smaller than `MIN_NATURAL_EXPONENT`, or larger than `MAX_NATURAL_EXPONENT`.
      */
-    function pow(uint256 x, uint256 y) internal pure returns (uint256) {
+    function _pow(uint256 x, uint256 y) internal pure returns (uint256) {
         if (y == 0) {
             // We solve the 0^0 indetermination by making it equal one.
             return uint256(ONE_18);

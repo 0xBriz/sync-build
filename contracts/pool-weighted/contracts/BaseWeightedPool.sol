@@ -12,8 +12,8 @@ import "./WeightedMath.sol";
 abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
     constructor(
         IVault vault,
-        string memory name,
-        string memory symbol,
+        string memory _name,
+        string memory _symbol,
         IERC20[] memory tokens,
         address[] memory assetManagers,
         uint256 swapFeePercentage,
@@ -32,8 +32,8 @@ abstract contract BaseWeightedPool is BaseMinimalSwapInfoPool {
             tokens.length == 2 && !mutableTokens
                 ? IVault.PoolSpecialization.TWO_TOKEN
                 : IVault.PoolSpecialization.MINIMAL_SWAP_INFO,
-            name,
-            symbol,
+            _name,
+            _symbol,
             tokens,
             assetManagers,
             swapFeePercentage,
