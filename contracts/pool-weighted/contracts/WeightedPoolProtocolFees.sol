@@ -7,7 +7,7 @@ import "@balancer-labs/v2-pool-utils/contracts/external-fees/ProtocolFeeCache.so
 import "../../pool-utils/contracts/external-fees/InvariantGrowthProtocolSwapFees.sol";
 import "./BaseWeightedPool.sol";
 
-abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache, IRateProvider {
+abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache {
     using FixedPointLite for uint256;
     using WordCodec for bytes32;
 

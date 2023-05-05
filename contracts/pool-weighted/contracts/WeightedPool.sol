@@ -8,12 +8,13 @@ import "@balancer-labs/v2-interfaces/contracts/pool-utils/IRateProvider.sol";
 import "@balancer-labs/v2-interfaces/contracts/standalone-utils/IProtocolFeePercentagesProvider.sol";
 
 import "./BaseWeightedPool.sol";
+import "./WeightedPoolProtocolFees.sol";
 
 // import "./WeightedMath.sol";
 
 import "../../solidity-utils/contracts/math/FixedPointLite.sol";
 
-contract WeightedPool is BaseWeightedPool {
+contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
     using FixedPointLite for uint256;
 
     uint256 private constant _MAX_TOKENS = 8;
@@ -81,6 +82,11 @@ contract WeightedPool is BaseWeightedPool {
             owner,
             false
         )
+        ProtocolFeeCache(
+            protocolFeeProvider,
+            ProviderFeeIDs({ swap: ProtocolFeeType.SWAP, yield: ProtocolFeeType.YIELD, aum: ProtocolFeeType.AUM })
+        )
+        WeightedPoolProtocolFees(params.tokens.length, params.rateProviders)
     {
         uint256 numTokens = params.tokens.length;
         InputHelpers.ensureInputLengthMatch(numTokens, params.normalizedWeights.length);
@@ -169,6 +175,12 @@ contract WeightedPool is BaseWeightedPool {
         return _totalTokens;
     }
 
+    function _updatePostJoinExit(
+        uint256 postJoinExitInvariant
+    ) internal virtual override(BaseWeightedPool, WeightedPoolProtocolFees) {
+        WeightedPoolProtocolFees._updatePostJoinExit(postJoinExitInvariant);
+    }
+
     /**
      * @dev Returns the scaling factor for one of the Pool's tokens. Reverts if `token` is not a token registered by the
      * Pool.
@@ -237,5 +249,11 @@ contract WeightedPool is BaseWeightedPool {
 
     function _getScalingFactor7() internal view returns (uint256) {
         return _scalingFactor7;
+    }
+
+    function _isOwnerOnlyAction(
+        bytes32 actionId
+    ) internal view virtual override(BasePool, WeightedPoolProtocolFees) returns (bool) {
+        return super._isOwnerOnlyAction(actionId);
     }
 }
