@@ -157,7 +157,6 @@ library LogExpMathLite {
     }
 
     function _expWork(int256 x) private pure returns (int256) {
-        require(x >= 0, "_expWork: x is negative");
         // First, we use the fact that e^(x+y) = e^x * e^y to decompose x into a sum of powers of two, which we call x_n,
         // where x_n == 2^(7 - n), and e^x_n = a_n has been precomputed. We choose the first x_n, x0, to equal 2^7
         // because all larger powers are larger than MAX_NATURAL_EXPONENT, and therefore not present in the
@@ -285,15 +284,152 @@ library LogExpMathLite {
         return (((product * seriesSum) / ONE_20) * firstAN) / 100;
     }
 
-    function _ln(int256 a) internal pure returns (int256) {
-        // if (a < ONE_18) {
-        //     // Since ln(a^k) = k * ln(a), we can compute ln(a) as ln(a) = ln((1/a)^(-1)) = - ln((1/a)). If a is less
-        //     // than one, 1/a will be greater than one, and this if statement will not be entered in the recursive call.
-        //     // Fixed point division requires multiplying by ONE_18.
-        //     return (-_ln((ONE_18 * ONE_18) / a));
-        // }
+    function ln(int256 a) internal pure returns (int256) {
+        // The real natural logarithm is not defined for negative numbers or zero.
+        _require(a > 0, Errors.OUT_OF_BOUNDS);
+        if (LN_36_LOWER_BOUND < a && a < LN_36_UPPER_BOUND) {
+            return _ln_36(a) / ONE_18;
+        } else {
+            return _ln(a);
+        }
+    }
 
-        return 0;
+    function _ln(int256 a) internal pure returns (int256) {
+        if (a < ONE_18) {
+            // Since ln(a^k) = k * ln(a), we can compute ln(a) as ln(a) = ln((1/a)^(-1)) = - ln((1/a)). If a is less
+            // than one, 1/a will be greater than one, and this if statement will not be entered in the recursive call.
+            // Fixed point division requires multiplying by ONE_18.
+            return (-_lnWork((ONE_18 * ONE_18) / a));
+        }
+
+        return _lnWork(a);
+    }
+
+    function _lnWork(int256 a) private pure returns (int256) {
+        // First, we use the fact that ln^(a * b) = ln(a) + ln(b) to decompose ln(a) into a sum of powers of two, which
+        // we call x_n, where x_n == 2^(7 - n), which are the natural logarithm of precomputed quantities a_n (that is,
+        // ln(a_n) = x_n). We choose the first x_n, x0, to equal 2^7 because the exponential of all larger powers cannot
+        // be represented as 18 fixed point decimal numbers in 256 bits, and are therefore larger than a.
+        // At the end of this process we will have the sum of all x_n = ln(a_n) that apply, and the remainder of this
+        // decomposition, which will be lower than the smallest a_n.
+        // ln(a) = k_0 * x_0 + k_1 * x_1 + ... + k_n * x_n + ln(remainder), where each k_n equals either 0 or 1.
+        // We mutate a by subtracting a_n, making it the remainder of the decomposition.
+
+        // For reasons related to how `exp` works, the first two a_n (e^(2^7) and e^(2^6)) are not stored as fixed point
+        // numbers with 18 decimals, but instead as plain integers with 0 decimals, so we need to multiply them by
+        // ONE_18 to convert them to fixed point.
+        // For each a_n, we test if that term is present in the decomposition (if a is larger than it), and if so divide
+        // by it and compute the accumulated sum.
+
+        int256 sum = 0;
+        if (a >= a0 * ONE_18) {
+            a /= a0; // Integer, not fixed point division
+            sum += x0;
+        }
+
+        if (a >= a1 * ONE_18) {
+            a /= a1; // Integer, not fixed point division
+            sum += x1;
+        }
+
+        // All other a_n and x_n are stored as 20 digit fixed point numbers, so we convert the sum and a to this format.
+        sum *= 100;
+        a *= 100;
+
+        // Because further a_n are  20 digit fixed point numbers, we multiply by ONE_20 when dividing by them.
+
+        if (a >= a2) {
+            a = (a * ONE_20) / a2;
+            sum += x2;
+        }
+
+        if (a >= a3) {
+            a = (a * ONE_20) / a3;
+            sum += x3;
+        }
+
+        if (a >= a4) {
+            a = (a * ONE_20) / a4;
+            sum += x4;
+        }
+
+        if (a >= a5) {
+            a = (a * ONE_20) / a5;
+            sum += x5;
+        }
+
+        if (a >= a6) {
+            a = (a * ONE_20) / a6;
+            sum += x6;
+        }
+
+        if (a >= a7) {
+            a = (a * ONE_20) / a7;
+            sum += x7;
+        }
+
+        if (a >= a8) {
+            a = (a * ONE_20) / a8;
+            sum += x8;
+        }
+
+        if (a >= a9) {
+            a = (a * ONE_20) / a9;
+            sum += x9;
+        }
+
+        if (a >= a10) {
+            a = (a * ONE_20) / a10;
+            sum += x10;
+        }
+
+        if (a >= a11) {
+            a = (a * ONE_20) / a11;
+            sum += x11;
+        }
+
+        // a is now a small number (smaller than a_11, which roughly equals 1.06). This means we can use a Taylor series
+        // that converges rapidly for values of `a` close to one - the same one used in ln_36.
+        // Let z = (a - 1) / (a + 1).
+        // ln(a) = 2 * (z + z^3 / 3 + z^5 / 5 + z^7 / 7 + ... + z^(2 * n + 1) / (2 * n + 1))
+
+        // Recall that 20 digit fixed point division requires multiplying by ONE_20, and multiplication requires
+        // division by ONE_20.
+        int256 z = ((a - ONE_20) * ONE_20) / (a + ONE_20);
+        int256 z_squared = (z * z) / ONE_20;
+
+        // num is the numerator of the series: the z^(2 * n + 1) term
+        int256 num = z;
+
+        // seriesSum holds the accumulated sum of each term in the series, starting with the initial z
+        int256 seriesSum = num;
+
+        // In each step, the numerator is multiplied by z^2
+        num = (num * z_squared) / ONE_20;
+        seriesSum += num / 3;
+
+        num = (num * z_squared) / ONE_20;
+        seriesSum += num / 5;
+
+        num = (num * z_squared) / ONE_20;
+        seriesSum += num / 7;
+
+        num = (num * z_squared) / ONE_20;
+        seriesSum += num / 9;
+
+        num = (num * z_squared) / ONE_20;
+        seriesSum += num / 11;
+
+        // 6 Taylor terms are sufficient for 36 decimal precision.
+
+        // Finally, we multiply by 2 (non fixed point) to compute ln(remainder)
+        seriesSum *= 2;
+
+        // We now have the sum of all x_n present, and the Taylor approximation of the logarithm of the remainder (both
+        // with 20 decimals). All that remains is to sum these two, and then drop two digits to return a 18 decimal
+        // value.
+
+        return (sum + seriesSum) / 100;
     }
 
     /**
