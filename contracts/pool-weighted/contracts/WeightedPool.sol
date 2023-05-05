@@ -17,7 +17,8 @@ import "../../solidity-utils/contracts/math/FixedPointLite.sol";
 contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
     using FixedPointLite for uint256;
 
-    uint256 private constant _MAX_TOKENS = 8;
+    /// @dev Reduced to 7 from 8 for zksync compilation error
+    uint256 private constant _MAX_TOKENS = 7;
 
     uint256 private immutable _totalTokens;
 
@@ -28,7 +29,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
     IERC20 internal immutable _token4;
     IERC20 internal immutable _token5;
     IERC20 internal immutable _token6;
-    IERC20 internal immutable _token7;
+    // IERC20 internal immutable _token7;
 
     // All token balances are normalized to behave as if the token had 18 decimals. We assume a token's decimals will
     // not change throughout its lifetime, and store the corresponding scaling factor for each at construction time.
@@ -41,7 +42,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
     uint256 internal immutable _scalingFactor4;
     uint256 internal immutable _scalingFactor5;
     uint256 internal immutable _scalingFactor6;
-    uint256 internal immutable _scalingFactor7;
+    // uint256 internal immutable _scalingFactor7;
 
     uint256 internal immutable _normalizedWeight0;
     uint256 internal immutable _normalizedWeight1;
@@ -50,7 +51,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
     uint256 internal immutable _normalizedWeight4;
     uint256 internal immutable _normalizedWeight5;
     uint256 internal immutable _normalizedWeight6;
-    uint256 internal immutable _normalizedWeight7;
+    // uint256 internal immutable _normalizedWeight7;
 
     struct NewPoolParams {
         string name;
@@ -112,7 +113,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
         _token4 = numTokens > 4 ? params.tokens[4] : IERC20(0);
         _token5 = numTokens > 5 ? params.tokens[5] : IERC20(0);
         _token6 = numTokens > 6 ? params.tokens[6] : IERC20(0);
-        _token7 = numTokens > 7 ? params.tokens[7] : IERC20(0);
+        // _token7 = numTokens > 7 ? params.tokens[7] : IERC20(0);
 
         _scalingFactor0 = _computeScalingFactor(params.tokens[0]);
         _scalingFactor1 = _computeScalingFactor(params.tokens[1]);
@@ -121,7 +122,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
         _scalingFactor4 = numTokens > 4 ? _computeScalingFactor(params.tokens[4]) : 0;
         _scalingFactor5 = numTokens > 5 ? _computeScalingFactor(params.tokens[5]) : 0;
         _scalingFactor6 = numTokens > 6 ? _computeScalingFactor(params.tokens[6]) : 0;
-        _scalingFactor7 = numTokens > 7 ? _computeScalingFactor(params.tokens[7]) : 0;
+        // _scalingFactor7 = numTokens > 7 ? _computeScalingFactor(params.tokens[7]) : 0;
 
         _normalizedWeight0 = params.normalizedWeights[0];
         _normalizedWeight1 = params.normalizedWeights[1];
@@ -130,7 +131,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
         _normalizedWeight4 = numTokens > 4 ? params.normalizedWeights[4] : 0;
         _normalizedWeight5 = numTokens > 5 ? params.normalizedWeights[5] : 0;
         _normalizedWeight6 = numTokens > 6 ? params.normalizedWeights[6] : 0;
-        _normalizedWeight7 = numTokens > 7 ? params.normalizedWeights[7] : 0;
+        // _normalizedWeight7 = numTokens > 7 ? params.normalizedWeights[7] : 0;
     }
 
     function _getNormalizedWeight(IERC20 token) internal view virtual override returns (uint256) {
@@ -142,7 +143,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
         else if (token == _token4) { return _normalizedWeight4; }
         else if (token == _token5) { return _normalizedWeight5; }
         else if (token == _token6) { return _normalizedWeight6; }
-        else if (token == _token7) { return _normalizedWeight7; }
+        // else if (token == _token7) { return _normalizedWeight7; }
         else {
             _revert(Errors.INVALID_TOKEN);
         }
@@ -161,7 +162,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
             if (totalTokens > 4) { normalizedWeights[4] = _normalizedWeight4; } else { return normalizedWeights; }
             if (totalTokens > 5) { normalizedWeights[5] = _normalizedWeight5; } else { return normalizedWeights; }
             if (totalTokens > 6) { normalizedWeights[6] = _normalizedWeight6; } else { return normalizedWeights; }
-            if (totalTokens > 7) { normalizedWeights[7] = _normalizedWeight7; } else { return normalizedWeights; }
+          // if (totalTokens > 7) { normalizedWeights[7] = _normalizedWeight7; } else { return normalizedWeights; }
         }
 
         return normalizedWeights;
@@ -188,7 +189,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
         else if (token == _token4) { return _getScalingFactor4(); }
         else if (token == _token5) { return _getScalingFactor5(); }
         else if (token == _token6) { return _getScalingFactor6(); }
-        else if (token == _token7) { return _getScalingFactor7(); }
+       // else if (token == _token7) { return _getScalingFactor7(); }
         else {
             _revert(Errors.INVALID_TOKEN);
         }
@@ -207,7 +208,7 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
             if (totalTokens > 4) { scalingFactors[4] = _getScalingFactor4(); } else { return scalingFactors; }
             if (totalTokens > 5) { scalingFactors[5] = _getScalingFactor5(); } else { return scalingFactors; }
             if (totalTokens > 6) { scalingFactors[6] = _getScalingFactor6(); } else { return scalingFactors; }
-            if (totalTokens > 7) { scalingFactors[7] = _getScalingFactor7(); } else { return scalingFactors; }
+            // if (totalTokens > 7) { scalingFactors[7] = _getScalingFactor7(); } else { return scalingFactors; }
         }
 
         return scalingFactors;
@@ -290,9 +291,9 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
         return _scalingFactor6;
     }
 
-    function _getScalingFactor7() internal view returns (uint256) {
-        return _scalingFactor7;
-    }
+    // function _getScalingFactor7() internal view returns (uint256) {
+    //     return _scalingFactor7;
+    // }
 
     function _isOwnerOnlyAction(
         bytes32 actionId

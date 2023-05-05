@@ -6,6 +6,7 @@ import "@balancer-labs/v2-interfaces/contracts/pool-utils/IRateProvider.sol";
 import "@balancer-labs/v2-pool-utils/contracts/external-fees/ProtocolFeeCache.sol";
 import "../../pool-utils/contracts/external-fees/InvariantGrowthProtocolSwapFees.sol";
 import "./BaseWeightedPool.sol";
+import "../../solidity-utils/contracts/math/FixedPointLite.sol";
 
 abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache {
     using FixedPointLite for uint256;
@@ -169,16 +170,16 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
         // Only charge yield fees if we've exceeded the all time high of Pool value generated through yield.
         // i.e. if the Pool makes a loss through the yield strategies then it shouldn't charge fees until it's
         // been recovered.
-        if (rateProduct <= athRateProduct) return (0, 0);
+        // if (rateProduct <= athRateProduct) return (0, 0);
 
-        return (
-            InvariantGrowthProtocolSwapFees.getProtocolOwnershipPercentage(
-                rateProduct.divDown(athRateProduct),
-                FixedPoint.ONE, // Supply has not changed so supplyGrowthRatio = 1
-                getProtocolFeePercentageCache(ProtocolFeeType.YIELD)
-            ),
-            rateProduct
-        );
+        // return (
+        //     InvariantGrowthProtocolSwapFees.getProtocolOwnershipPercentage(
+        //         rateProduct.divDown(athRateProduct),
+        //         FixedPoint.ONE, // Supply has not changed so supplyGrowthRatio = 1
+        //         getProtocolFeePercentageCache(ProtocolFeeType.YIELD)
+        //     ),
+        //     rateProduct
+        // );
     }
 
     function _updateATHRateProduct(uint256 rateProduct) internal {
@@ -204,9 +205,9 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
             preJoinExitInvariant,
             getProtocolFeePercentageCache(ProtocolFeeType.SWAP)
         );
-        // (uint256 protocolYieldFeesPoolPercentage, uint256 athRateProduct) = _getYieldProtocolFeesPoolPercentage(
-        //     normalizedWeights
-        // );
+        (uint256 protocolYieldFeesPoolPercentage, uint256 athRateProduct) = _getYieldProtocolFeesPoolPercentage(
+            normalizedWeights
+        );
 
         // return (
         //     ExternalFees.bptForPoolOwnershipPercentage(
@@ -283,7 +284,7 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
      * @notice Returns the contribution to the total rate product from a token with the given weight and rate provider.
      */
     function _getRateFactor(uint256 normalizedWeight, IRateProvider provider) internal view returns (uint256) {
-        return provider == IRateProvider(0) ? FixedPoint.ONE : provider.getRate().powDown(normalizedWeight);
+        return provider == IRateProvider(0) ? FixedPointLite.ONE : provider.getRate().powDown(normalizedWeight);
     }
 
     /**
@@ -322,9 +323,9 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
         } else {
             return rateProduct;
         }
-        if (totalTokens > 7) {
-            rateProduct = rateProduct.mulDown(_getRateFactor(normalizedWeights[7], _rateProvider7));
-        }
+        // if (totalTokens > 7) {
+        //     rateProduct = rateProduct.mulDown(_getRateFactor(normalizedWeights[7], _rateProvider7));
+        // }
 
         return rateProduct;
     }
