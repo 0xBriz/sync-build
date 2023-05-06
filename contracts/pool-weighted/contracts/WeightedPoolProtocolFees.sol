@@ -7,6 +7,7 @@ import "@balancer-labs/v2-pool-utils/contracts/external-fees/ProtocolFeeCache.so
 import "../../pool-utils/contracts/external-fees/InvariantGrowthProtocolSwapFees.sol";
 import "./BaseWeightedPool.sol";
 import "../../solidity-utils/contracts/math/FixedPointLite.sol";
+import "./WeightedMath.sol";
 
 abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache {
     using FixedPointLite for uint256;
@@ -20,7 +21,7 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
     IRateProvider internal immutable _rateProvider4;
     IRateProvider internal immutable _rateProvider5;
     IRateProvider internal immutable _rateProvider6;
-    IRateProvider internal immutable _rateProvider7;
+    // IRateProvider internal immutable _rateProvider7;
 
     bool internal immutable _exemptFromYieldFees;
 
@@ -53,7 +54,7 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
         _rateProvider4 = numTokens > 4 ? rateProviders[4] : IRateProvider(0);
         _rateProvider5 = numTokens > 5 ? rateProviders[5] : IRateProvider(0);
         _rateProvider6 = numTokens > 6 ? rateProviders[6] : IRateProvider(0);
-        _rateProvider7 = numTokens > 7 ? rateProviders[7] : IRateProvider(0);
+        // _rateProvider7 = numTokens > 7 ? rateProviders[7] : IRateProvider(0);
     }
 
     function _getYieldFeeExemption(IRateProvider[] memory rateProviders) internal pure returns (bool) {
@@ -103,7 +104,7 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
             if (totalTokens > 4) { providers[4] = _rateProvider4; } else { return providers; }
             if (totalTokens > 5) { providers[5] = _rateProvider5; } else { return providers; }
             if (totalTokens > 6) { providers[6] = _rateProvider6; } else { return providers; }
-            if (totalTokens > 7) { providers[7] = _rateProvider7; } else { return providers; }
+            // if (totalTokens > 7) { providers[7] = _rateProvider7; } else { return providers; }
         }
 
         return providers;
@@ -247,21 +248,23 @@ abstract contract WeightedPoolProtocolFees is BaseWeightedPool, ProtocolFeeCache
         }
 
         // preBalances have now been mutated to reflect the postJoinExit balances.
-        uint256 postJoinExitInvariant = WeightedMath._calculateInvariant(normalizedWeights, preBalances);
-        uint256 protocolSwapFeePercentage = getProtocolFeePercentageCache(ProtocolFeeType.SWAP);
+        // uint256 postJoinExitInvariant = WeightedMath._calculateInvariant(normalizedWeights, preBalances);
+        // uint256 protocolSwapFeePercentage = getProtocolFeePercentageCache(ProtocolFeeType.SWAP);
 
-        _updatePostJoinExit(postJoinExitInvariant);
-        // We return immediately if the fee percentage is zero to avoid unnecessary computation.
-        if (protocolSwapFeePercentage == 0) return 0;
+        // _updatePostJoinExit(postJoinExitInvariant);
+        // // We return immediately if the fee percentage is zero to avoid unnecessary computation.
+        // if (protocolSwapFeePercentage == 0) return 0;
 
-        uint256 protocolFeeAmount = InvariantGrowthProtocolSwapFees.calcDueProtocolFees(
-            postJoinExitInvariant.divDown(preJoinExitInvariant),
-            preJoinExitSupply,
-            postJoinExitSupply,
-            protocolSwapFeePercentage
-        );
+        // uint256 protocolFeeAmount = InvariantGrowthProtocolSwapFees.calcDueProtocolFees(
+        //     postJoinExitInvariant.divDown(preJoinExitInvariant),
+        //     preJoinExitSupply,
+        //     postJoinExitSupply,
+        //     protocolSwapFeePercentage
+        // );
 
-        return protocolFeeAmount;
+        // return protocolFeeAmount;
+
+        return 0;
     }
 
     function _updatePostJoinExit(uint256 postJoinExitInvariant) internal virtual override {

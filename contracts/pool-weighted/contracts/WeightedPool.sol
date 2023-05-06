@@ -255,6 +255,26 @@ contract WeightedPool is BaseWeightedPool, WeightedPoolProtocolFees {
         return (supplyBeforeFeeCollection.add(protocolFeesToBeMinted), invariant);
     }
 
+    function _afterJoinExit(
+        uint256 preJoinExitInvariant,
+        uint256[] memory preBalances,
+        uint256[] memory balanceDeltas,
+        uint256[] memory normalizedWeights,
+        uint256 preJoinExitSupply,
+        uint256 postJoinExitSupply
+    ) internal virtual override {
+        uint256 protocolFeesToBeMinted = _getPostJoinExitProtocolFees(
+            preJoinExitInvariant,
+            preBalances,
+            balanceDeltas,
+            normalizedWeights,
+            preJoinExitSupply,
+            postJoinExitSupply
+        );
+
+        _payProtocolFees(protocolFeesToBeMinted);
+    }
+
     function _updatePostJoinExit(
         uint256 postJoinExitInvariant
     ) internal virtual override(BaseWeightedPool, WeightedPoolProtocolFees) {
